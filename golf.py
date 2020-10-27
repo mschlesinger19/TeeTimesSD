@@ -1,8 +1,9 @@
 import time
 import sys
-from datetime import datetime
+import datetime
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from time import sleep
 
 # 1 is Torrey North 2 is Torrey South
 if (len(sys.argv) < 5):
@@ -12,9 +13,16 @@ course = "1" if sys.argv[1] == "Torrey Pines North" else "2"
 # Read player number
 players = sys.argv[2]
 
+# if length of args == 5 then set wait flag to true
+if (len(sys.argv) == 6):
+    waitFlag = True
+    waitTime = datetime.datetime.strptime(sys.argv[5], "%H:%M")
+else:
+    waitFlag = False
+
 # Read date
-dateToPlay = datetime.strptime(sys.argv[3], '%m/%d/%y')
-today = datetime.today()
+dateToPlay = datetime.datetime.strptime(sys.argv[3], '%m/%d/%y')
+today = datetime.datetime.today()
 # Add 2 because strptime assumes beginning of day AND dropdown begins at 1
 deltaDays = dateToPlay - today
 daysAway = deltaDays.days + 2
@@ -22,7 +30,7 @@ if daysAway > 8:
     sys.exit('Days away exceeds 7.')
 
 # Read time
-teeTime = datetime.strptime(sys.argv[4], "%H:%M")
+teeTime = datetime.datetime.strptime(sys.argv[4], "%H:%M")
 
 driver = webdriver.Chrome()
 driver.get('https://foreupsoftware.com/index.php/booking/19347/1468#/teetimes')
@@ -45,13 +53,22 @@ time.sleep(2)
 driver.find_element_by_xpath('//*[@id="schedule_select"]/option[%s]' % course).click()
 # Select Players
 driver.find_element_by_xpath('//*[@id="nav"]/div/div[3]/div/div/a[%s]' % players).click()
+
+# Wait until 7:00
+if waitFlag:
+    today = datetime.datetime.today()
+    startTime = datetime.datetime.combine(today, waitTime.time())
+    print("Sleeping until: " + startTime.strftime("%H:%M:%S"))
+    while startTime.time() > datetime.datetime.today().time(): # you can add here any additional variable to break loop if necessary
+        sleep(1)
+
 # Set Date
 driver.find_element_by_xpath('//*[@id="date-menu"]/option[%s]' % daysAway).click()
 # Get times
-time.sleep(0.75)
+time.sleep(0.6)
 times = driver.find_elements_by_class_name('start')
 for i in range(len(times)):
-    availableTime = datetime.strptime(times[i].text, "%I:%M%p")
+    availableTime = datetime.datetime.strptime(times[i].text, "%I:%M%p")
     isLater = availableTime >= teeTime
     if isLater:
         x = i + 1
