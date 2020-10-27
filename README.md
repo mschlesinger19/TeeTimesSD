@@ -31,7 +31,7 @@ You also need to edit the script to input your email and password into the scrip
 
 ## Desired Changes <a name="desired-changes"></a>
 
-1. Add other courses
-2. ~~I am looking to add a flag to wait until 7:00 PM PST for the tee times the following week to open.~~
+1. Add other SD courses
+2. ~~I am looking to add a flag to wait until 7:00 PM PST for the tee times the following week to open.~~ Done.
 3. Config file for credentials
 4. Including other GolfNow courses.
