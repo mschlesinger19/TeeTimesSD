@@ -4,6 +4,12 @@ import datetime
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from time import sleep
+import configparser
+
+# Read credentials from config.txt
+configParser = configparser.RawConfigParser()   
+configFilePath = r'config.txt'
+configParser.read(configFilePath)
 
 # 1 is Torrey North 2 is Torrey South
 if (len(sys.argv) < 5):
@@ -21,7 +27,7 @@ else:
     waitFlag = False
 
 # Read date
-dateToPlay = datetime.datetime.strptime(sys.argv[3], '%m/%d/%y')
+dateToPlay = datetime.datetime.strptime(sys.argv[3], '%m-%d-%y')
 today = datetime.datetime.today()
 # Add 2 because strptime assumes beginning of day AND dropdown begins at 1
 deltaDays = dateToPlay - today
@@ -32,15 +38,19 @@ if daysAway > 8:
 # Read time
 teeTime = datetime.datetime.strptime(sys.argv[4], "%H:%M")
 
-driver = webdriver.Chrome()
+# Start browser maximized
+options = webdriver.ChromeOptions()
+options.add_argument("--start-maximized")
+driver = webdriver.Chrome(options=options)
 driver.get('https://foreupsoftware.com/index.php/booking/19347/1468#/teetimes')
+
 # Login
 inputElement = driver.find_element_by_name("username")
 # Insert username
-inputElement.send_keys('email@gmail.com')
+inputElement.send_keys(configParser.get('credentials', 'username'))
 inputElement = driver.find_element_by_name("password")
 # Insert Password
-inputElement.send_keys('password')
+inputElement.send_keys(configParser.get('credentials', 'password'))
 inputElement.send_keys(Keys.RETURN)
 time.sleep(2)
 # Have to refresh page to load buttons
@@ -63,7 +73,13 @@ if waitFlag:
         sleep(1)
 
 # Set Date
-driver.find_element_by_xpath('//*[@id="date-menu"]/option[%s]' % daysAway).click()
+dateElement = driver.find_element_by_xpath('//*[@id="date-field"]')
+dateElement.send_keys(Keys.CONTROL + "a");
+dateElement.send_keys(Keys.DELETE);
+print(dateToPlay.strftime("%M-%d-%Y"))
+dateElement.send_keys(dateToPlay.strftime("%m-%d-%Y"))
+dateElement.send_keys(Keys.ENTER);
+
 # Get times
 time.sleep(0.6)
 times = driver.find_elements_by_class_name('start')

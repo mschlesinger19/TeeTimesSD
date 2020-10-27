@@ -16,6 +16,8 @@ In addition, ensure that the chrome browser driver is in the same folder. The Ch
 
 ## Usage
 
+First, you need to edit the `config.txt` file to change the `username` and `password` to your credentials.
+
 There are 4 parameters necessary for the script to work.
 ```bash
 python golf.py [1] [2] [3] [4] optional[5]
@@ -23,7 +25,7 @@ python golf.py [1] [2] [3] [4] optional[5]
 
 1. Golf course name ex. "Torrey Pines South"
 2. Number of golfers ex. 2
-3. Date formatted as so: "9/28/20"
+3. Date formatted as so: "9-28-20"
 4. Earliest desired tee time: "16:00" (formatted in 24 hour clock)
 5. If you want to wait unitl a certain time to book: "19:00"
 
@@ -33,5 +35,5 @@ You also need to edit the script to input your email and password into the scrip
 
 1. Add other SD courses
 2. ~~I am looking to add a flag to wait until 7:00 PM PST for the tee times the following week to open.~~ Done.
-3. Config file for credentials
+3. ~~Config file for credentials~~ Done.
 4. Including other GolfNow courses.
