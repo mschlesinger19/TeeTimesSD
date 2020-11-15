@@ -5,6 +5,9 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from time import sleep
 import configparser
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 # Read credentials from config.txt
 configParser = configparser.RawConfigParser()   
@@ -61,8 +64,13 @@ for btn in buttons:
 time.sleep(2)
 # Select Course
 driver.find_element_by_xpath('//*[@id="schedule_select"]/option[%s]' % course).click()
-# Select Players
-driver.find_element_by_xpath('//*[@id="nav"]/div/div[3]/div/div/a[%s]' % players).click()
+# Set Date
+dateElement = driver.find_element_by_xpath('//*[@id="date-field"]')
+dateElement.send_keys(Keys.CONTROL + "a");
+dateElement.send_keys(Keys.DELETE);
+print(dateToPlay.strftime("%M-%d-%Y"))
+dateElement.send_keys(dateToPlay.strftime("%m-%d-%Y"))
+dateElement.send_keys(Keys.ENTER);
 
 # Wait until 7:00
 if waitFlag:
@@ -72,21 +80,26 @@ if waitFlag:
     while startTime.time() > datetime.datetime.today().time(): # you can add here any additional variable to break loop if necessary
         sleep(1)
 
-# Set Date
-dateElement = driver.find_element_by_xpath('//*[@id="date-field"]')
-dateElement.send_keys(Keys.CONTROL + "a");
-dateElement.send_keys(Keys.DELETE);
-print(dateToPlay.strftime("%M-%d-%Y"))
-dateElement.send_keys(dateToPlay.strftime("%m-%d-%Y"))
-dateElement.send_keys(Keys.ENTER);
+# Select Players
+driver.find_element_by_xpath('//*[@id="nav"]/div/div[3]/div/div/a[%s]' % players).click()
 
 # Get times
-time.sleep(0.6)
-times = driver.find_elements_by_class_name('start')
-for i in range(len(times)):
-    availableTime = datetime.datetime.strptime(times[i].text, "%I:%M%p")
-    isLater = availableTime >= teeTime
-    if isLater:
-        x = i + 1
-        driver.find_element_by_xpath('//*[@id="times"]/li[%s]' % x).click()
-        break
+WebDriverWait(driver, 20, poll_frequency=.1).until(EC.visibility_of_element_located((By.CLASS_NAME, "loading")))
+WebDriverWait(driver, 20, poll_frequency=.1).until(EC.invisibility_of_element_located((By.CLASS_NAME, "loading")))
+
+#time.sleep(0.3)
+booked = False
+while booked == False:
+    times = driver.find_elements_by_class_name('start')
+    for i in range(len(times)):
+        availableTime = datetime.datetime.strptime(times[i].text, "%I:%M%p")
+        isLater = availableTime >= teeTime
+        if isLater:
+            x = i + 1
+            try:
+                driver.find_element_by_xpath('//*[@id="times"]/li[%s]' % x).click()
+                driver.find_element_by_id("book_time")
+            except:
+                break
+            else:
+                booked = True
